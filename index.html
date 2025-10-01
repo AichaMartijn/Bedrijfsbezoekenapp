@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Inschrijving Bedrijfsbezoeken</title>
+<link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text y="50" font-size="52">🦋</text></svg>' />
+<style>
+  :root{ --bg:#0f172a; --card:#111827; --muted:#94a3b8; --primary:#22c55e; --danger:#ef4444; --ring:#334155; --text:#e5e7eb; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:linear-gradient(180deg,#0b1220 0%,#0f172a 100%);color:var(--text)}
+  header{padding:18px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1f2937;background:rgba(15,23,42,.85);backdrop-filter:blur(8px)}
+  h1{margin:0;font-size:18px}
+  .pill{font-size:12px;color:#a5b4fc;background:#111827;padding:6px 10px;border:1px solid #1f2937;border-radius:999px}
+  main{max-width:900px;margin:22px auto;padding:0 16px;display:grid;grid-template-columns:1fr;gap:18px}
+  .card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:16px}
+  .card h2{margin:0 0 10px 0;font-size:18px}
+  label{display:block;font-size:14px;color:var(--muted);margin:8px 0 6px}
+  input,select{width:100%;background:#0b1220;border:1px solid var(--ring);color:var(--text);padding:10px 12px;border-radius:10px;outline:none;font-size:14px}
+  input:focus,select:focus{border-color:#60a5fa;box-shadow:0 0 0 3px rgba(96,165,250,.15)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:10px;border:1px solid #1f2937;cursor:pointer;font-weight:600}
+  .primary{background:var(--primary);color:#062a12;border-color:#16a34a}
+  .danger{background:#ef4444;border-color:#b91c1c}
+  .muted{color:#94a3b8}
+  .lessons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .lesson{background:#0b1220;border:1px solid var(--ring);border-radius:10px;padding:10px}
+  .lesson h4{margin:0 0 6px 0;font-size:14px}
+  .cap{font-size:12px;color:#a3e635}
+  .full{color:#fca5a5}
+  .code{font-family:ui-monospace,Menlo,Consolas,monospace;background:#0b1220;border:1px dashed #334155;padding:2px 6px;border-radius:6px}
+  @media (max-width:720px){ .row{grid-template-columns:1fr} .lessons{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Inschrijving Bedrijfsbezoeken</h1>
+  <span class="pill">Boeken t/m di 14 okt 2025</span>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Boeking maken</h2>
+    <p class="muted">Je kunt je voor <strong>maximaal één</strong> bedrijfsbezoek inschrijven. Inschrijven kan t/m <strong>dinsdag 14 oktober 2025</strong>.</p>
+    <div class="row">
+      <div>
+        <label>Voor- en achternaam</label>
+        <input id="name" placeholder="Bijv. Sam Student" />
+      </div>
+      <div>
+        <label>Studentnummer</label>
+        <input id="sid" inputmode="numeric" pattern="[0-9]*" placeholder="Bijv. 1234567" />
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>E-mail (verplicht)</label>
+        <input id="email" type="email" placeholder="bijv. studentnummer@hr.nl" required />
+      </div>
+      <div>
+        <label>Kies bedrijfsbezoek</label>
+        <select id="lesson"></select>
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn primary" id="bookBtn">Boek plek</button>
+      <span id="bookMsg" class="muted"></span>
+    </div>
+
+    <div class="card" style="margin-top:14px;background:#0b1220">
+      <div class="muted" style="margin-bottom:6px">Beschikbaarheid (live)</div>
+      <div id="availability" class="lessons"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Zelf annuleren</h2>
+    <div class="row">
+      <div>
+        <label>Studentnummer</label>
+        <input id="cancelSid" inputmode="numeric" pattern="[0-9]*" placeholder="1234567" />
+      </div>
+      <div>
+        <label>Annuleercode</label>
+        <input id="cancelCode" placeholder="bijv. X7F2-9PKD" />
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn danger" id="cancelBtn">Annuleer mijn inschrijving</button>
+      <p class="muted" style="margin-top:8px">Je code staat in je bevestiging na het boeken (en in de e-mail).</p>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ===== CONFIG ===== */
+const CONFIG = {
+  API_BASE: "https://script.google.com/macros/s/AKfycbzmH7XZjnBgA9C_uq1mXZrfAvehREOb4sHQ5OTUdy35qOchB7gTOFn76lt09bNUQRBi/exec", // <— jouw /exec URL
+  API_KEY:  "BizVisits2025!",
+  DEADLINE_ISO: "2025-10-14T21:59:59Z", // 14 okt 2025 23:59 (Amsterdam) = 21:59 UTC
+  MAX_BOOKINGS_PER_SID: 1, // <— maximaal 1 per student
+  lessons: [
+    { id:"ERASMUS-MC-10-12", name:"Erasmus MC (Rotterdam) — 10:00–12:00", capacity:25 },
+    { id:"MAMMOET-10-12",    name:"Mammoet (Schiedam) — 10:00–12:00",    capacity:12  },
+  ],
+};
+
+const els = {
+  name: document.getElementById("name"),
+  sid: document.getElementById("sid"),
+  email: document.getElementById("email"),
+  lesson: document.getElementById("lesson"),
+  bookBtn: document.getElementById("bookBtn"),
+  bookMsg: document.getElementById("bookMsg"),
+  availability: document.getElementById("availability"),
+  cancelSid: document.getElementById("cancelSid"),
+  cancelCode: document.getElementById("cancelCode"),
+  cancelBtn: document.getElementById("cancelBtn"),
+};
+
+function normSid(v){ return String(v||"").replace(/\D+/g,""); }
+function isValidEmail(s){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s||"").trim()); }
+function uid(len=4){ const a=Math.random().toString(36).slice(2).toUpperCase(); const b=Math.random().toString(36).slice(2).toUpperCase(); return a.slice(0,len)+"-"+b.slice(0,len); }
+function msg(t,err=false){ els.bookMsg.innerHTML=t; els.bookMsg.style.color = err ? "#fca5a5" : "#a7f3d0"; }
+
+async function apiGet(params){
+  const url = new URL(CONFIG.API_BASE);
+  Object.entries(Object.assign({}, params, { key: CONFIG.API_KEY })).forEach(([k,v])=>url.searchParams.set(k,v));
+  const res = await fetch(url.toString());
+  return res.json();
+}
+async function apiPost(params){
+  const body = new URLSearchParams(Object.assign({}, params, { apiKey: CONFIG.API_KEY }));
+  const res = await fetch(CONFIG.API_BASE, { method:"POST", body });
+  return res.json();
+}
+
+function renderLessonOptions(){
+  els.lesson.innerHTML = `<option value="">Kies een bezoek…</option>`;
+  CONFIG.lessons.forEach(l=>{
+    const o = document.createElement("option");
+    o.value = l.id; o.textContent = l.name;
+    els.lesson.appendChild(o);
+  });
+}
+
+async function fetchCounts(){
+  try{ const data = await apiGet({ op:"counts" }); return data.counts || {}; }catch(e){ return {}; }
+}
+async function renderAvailability(){
+  const counts = await fetchCounts();
+  els.availability.innerHTML = "";
+  CONFIG.lessons.forEach(l=>{
+    const used = counts[l.id] || 0, left = Math.max(0, l.capacity - used);
+    const box = document.createElement("div");
+    box.className = "lesson";
+    box.innerHTML = `<h4>${l.name}</h4>
+      <div><span class="cap">${used}/${l.capacity}</span> bezet · <span class="${left>0?'':'full'}">${left>0? left+' vrij':'VOL'}</span></div>`;
+    els.availability.appendChild(box);
+  });
+}
+
+function pastDeadline(){
+  const now = Date.now();
+  const deadline = Date.parse(CONFIG.DEADLINE_ISO);
+  return now > deadline;
+}
+
+async function book(){
+  if(pastDeadline()) return msg("Inschrijven is gesloten (deadline verstreken).", true);
+
+  const name = els.name.value.trim();
+  const sid  = normSid(els.sid.value);
+  const email= (els.email.value||"").trim();
+  const lessonId = els.lesson.value;
+
+  if(!name || !sid || !lessonId) return msg("Vul naam, studentnummer en een bezoek in.", true);
+  if(sid.length < 5) return msg("Studentnummer moet uit minimaal 5 cijfers bestaan.", true);
+  if(!email || !isValidEmail(email)) return msg("Vul een geldig e-mailadres in.", true);
+
+  const code = uid(4);
+  const l = CONFIG.lessons.find(x=>x.id===lessonId);
+  const resp = await apiPost({
+    op:"add", lessonId, lessonName: l.name,
+    name, sid, email, code, timestamp: new Date().toISOString()
+  });
+  if(!resp.ok){
+    if(resp.error === "limit_reached") return msg("Je staat al ingeschreven voor een bedrijfsbezoek. Annuleer eerst om te wisselen.", true);
+    if(resp.error === "full") return msg("Dit bezoek is vol.", true);
+    if(resp.error === "closed") return msg("Inschrijven is gesloten (deadline verstreken).", true);
+    return msg("Boeken mislukt: "+(resp.error||"onbekend"), true);
+  }
+
+  await renderAvailability();
+  msg(`Ingeschreven! Jouw annuleercode: <span class="code">${code}</span> (bewaar deze)`);
+  els.lesson.value = "";
+}
+
+async function cancelOwn(){
+  const sid = normSid(els.cancelSid.value);
+  const code = (els.cancelCode.value||"").trim().toUpperCase();
+  if(!sid || !code) return alert("Vul studentnummer en annuleercode in.");
+  const resp = await apiPost({ op:"cancel", sid, code });
+  if(!resp.ok){ return alert("Annuleren mislukt: " + (resp.error||"onbekend")); }
+  await renderAvailability();
+  alert("Je inschrijving is geannuleerd. Er is een bevestiging gemaild.");
+  els.cancelSid.value=""; els.cancelCode.value="";
+}
+
+document.getElementById("bookBtn").addEventListener("click", book);
+document.getElementById("cancelBtn").addEventListener("click", cancelOwn);
+
+renderLessonOptions();
+renderAvailability();
+if(pastDeadline()){
+  document.getElementById("bookBtn").disabled = true;
+  document.getElementById("bookBtn").title = "Inschrijven gesloten";
+}
+</script>
+</body>
+</html>
