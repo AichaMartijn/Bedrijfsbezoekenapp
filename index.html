@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Inschrijving Bedrijfsbezoek CGI</title>
+<title>Inschrijving Bedrijfsbezoeken</title>
 <link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text y="50" font-size="52">🦋</text></svg>' />
 <style>
   :root{ --bg:#0f172a; --card:#111827; --muted:#94a3b8; --primary:#22c55e; --danger:#ef4444; --ring:#334155; --text:#e5e7eb; }
@@ -34,14 +34,14 @@
 </head>
 <body>
 <header>
-  <h1>Inschrijving Bedrijfsbezoek CGI</h1>
-  <span class="pill">Boeken t/m vr 19 dec 2025</span>
+  <h1>Inschrijving Bedrijfsbezoeken</h1>
+  <span class="pill">Boeken t/m di 31 mrt 2026</span>
 </header>
 
 <main>
   <section class="card">
     <h2>Boeking maken</h2>
-    <p class="muted">Je kunt je voor <strong>maximaal één</strong> bedrijfsbezoek inschrijven. Inschrijven kan t/m <strong>vrijdag 19 december 2025</strong>.<br><br><strong>Tijd:</strong> 10:00 – 12:00<br><strong>Locatie:</strong> CGI, George Hintzenweg 89, 3968 AX Rotterdam</p>
+    <p class="muted">Je kunt je voor <strong>maximaal één</strong> bedrijfsbezoek inschrijven. Inschrijven kan t/m <strong>dinsdag 31 maart 2026</strong>. Per bedrijfsbezoek zijn er maximaal <strong>25 plekken</strong> beschikbaar. <strong>Vol = vol</strong>.</p>
     <div class="row">
       <div>
         <label>Voor- en achternaam</label>
@@ -97,10 +97,11 @@
 const CONFIG = {
   API_BASE: "https://script.google.com/macros/s/AKfycbzmH7XZjnBgA9C_uq1mXZrfAvehREOb4sHQ5OTUdy35qOchB7gTOFn76lt09bNUQRBi/exec", // <— jouw /exec URL
   API_KEY:  "BizVisits2025!",
-  DEADLINE_ISO: "2025-12-19T22:59:59+01:00", // 19 dec 2025 23:59 (Amsterdam) = 21:59 UTC
-  MAX_BOOKINGS_PER_SID: 1, // <— maximaal 1 per student
+  DEADLINE_ISO: "2026-03-31T23:59:59+02:00", // 31 mrt 2026 23:59 Europe/Amsterdam
+  MAX_BOOKINGS_PER_SID: 1, // maximaal 1 per student
   lessons: [
-    { id:"CGI-2026-01-22", name:"CGI — 22 januari 2026 (10:00–12:00)", capacity:40 },
+    { id:"RIJKZWAAN-2026-04-02", name:"Rijk Zwaan — 2 april 2026 (13:30–16:00) · De Lier", capacity:25 },
+    { id:"SOGETI-2026-04-09", name:"Sogeti — 9 april 2026 (09:30–12:30) · Utrecht", capacity:25 },
   ],
 };
 
